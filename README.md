@@ -1,6 +1,4 @@
-# Webpack JavaScript Template
-
-A simple and easy-to-use template for starting a new JavaScript project with Webpack.
+# videosdk->js-sdk
 
 ## Usage
 

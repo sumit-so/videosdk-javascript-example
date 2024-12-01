@@ -1,88 +1,152 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <title><%= htmlWebpackPlugin.options.title %></title>
-    <style>
-        *{
-            padding: 0;
-            margin: 0;
-        }
-        .container{
-            width: fit-content;
-            height: fit-content;
-            margin:0 auto;
-            text-align: center;
-        }
-    </style>
-</head>
-<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center min-h-screen text-white">
-    <div class="bg-gray-800 shadow-xl rounded-lg p-8 w-96 mx-auto">
-        <!-- Header Section -->
-        <div class="text-center mb-6">
-            <h1 class="text-2xl font-bold text-white">Join or Create a Meeting</h1>
-            <p class="text-gray-400 text-sm">Experience seamless video collaboration</p>
-        </div>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body
+    class="bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center min-h-screen text-white"
+  >
+    <!-- join screen -->
+    <div
+      id="joinscreen"
+      style="display: none"
+      class="bg-gray-800 shadow-xl rounded-lg p-8 w-96 mx-auto"
+    >
+      <!-- Header Section -->
+      <div class="text-center mb-6">
+        <h1 class="text-2xl font-bold text-white">Join or Create a Meeting</h1>
+        <p class="text-gray-400 text-sm">
+          Experience seamless video collaboration
+        </p>
+      </div>
 
-        <!-- Input Field -->
-        <div class="mb-6">
-            <div class="relative">
-                <input
-                    type="text"
-                    placeholder="Enter Meeting ID"
-                    class="w-full p-3 pl-12 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-400"
-                />
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="h-6 w-6 text-gray-400 absolute top-1/2 left-4 transform -translate-y-1/2"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M17 9V7a4 4 0 10-8 0v2m-2 0a6 6 0 0112 0v2a6 6 0 11-12 0V9z"
-                    />
-                </svg>
-            </div>
+      <!-- Input Field -->
+      <div class="mb-6">
+        <div class="relative">
+          <input
+            id="input-meeting-id"
+            type="text"
+            placeholder="Enter Meeting ID"
+            class="w-full p-3 pl-12 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-400"
+          />
         </div>
+      </div>
 
-        <!-- Join Meeting Button -->
-        <div class="mb-4">
+      <!-- Join Meeting Button -->
+      <div class="mb-4">
+        <button
+          id="join-meeting-btn"
+          class="w-full bg-blue-600 py-3 rounded-lg hover:bg-blue-700 transition shadow-md hover:shadow-lg"
+        >
+          Join Meeting
+        </button>
+      </div>
+
+      <!-- Divider -->
+      <div class="flex items-center mb-4">
+        <div class="h-px bg-gray-700 flex-grow"></div>
+        <span class="px-4 text-sm text-gray-400">or</span>
+        <div class="h-px bg-gray-700 flex-grow"></div>
+      </div>
+
+      <!-- Create Meeting Button -->
+      <div>
+        <button
+          id="create-meeting-btn"
+          class="w-full bg-green-500 py-3 rounded-lg hover:bg-green-600 transition shadow-md hover:shadow-lg"
+        >
+          Create Meeting
+        </button>
+      </div>
+    </div>
+
+    <!-- precall -->
+    <div id="pre-call" style="display: none" class="relative">
+      <!-- Go Back Button -->
+      <div class="absolute -top-10 left-2">
+        <button
+          id="back-to-joinscreen"
+          class="flex items-center text-gray-400 hover:text-white"
+        >
+          <i class="fas fa-chevron-left mr-2"></i>
+          Go Back
+        </button>
+      </div>
+      <div class="flex flex-col items-center gap-4">
+        <!-- Video Preview with Fallback -->
+        <div
+          class="relative w-full max-w-md aspect-video bg-gray-800 rounded-lg shadow-md flex items-center justify-center"
+        >
+          <video
+            id="camera-preview"
+            autoplay
+            muted
+            playsinline
+            class="w-full h-full object-cover rounded-lg"
+          ></video>
+          <!-- Fallback UI -->
+          <div
+            id="webcam-fallback-ui"
+            class="absolute inset-0 flex items-center justify-center w-full h-full bg-gray-900 text-gray-500 text-lg font-medium"
+          >
+            Select a camera
+          </div>
+
+          <!-- Bottom Icons -->
+          <div
+            id="bottom-icons"
+            class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-4"
+          >
+            <!-- Camera Toggle Icon -->
             <button
-                class="w-full bg-blue-600 py-3 rounded-lg hover:bg-blue-700 transition shadow-md hover:shadow-lg"
+              id="icon-toggle-camera"
+              class="grid place-items-center bg-gray-700 p-3 h-10 w-10 rounded-full hover:bg-gray-600 text-white shadow-lg"
             >
-                Join Meeting
+              <i class="fas fa-video"></i>
             </button>
-        </div>
 
-        <!-- Divider -->
-        <div class="flex items-center mb-4">
-            <div class="h-px bg-gray-700 flex-grow"></div>
-            <span class="px-4 text-sm text-gray-400">or</span>
-            <div class="h-px bg-gray-700 flex-grow"></div>
-        </div>
-
-        <!-- Create Meeting Button -->
-        <div>
+            <!-- Microphone Toggle Icon -->
             <button
-                class="w-full bg-green-500 py-3 rounded-lg hover:bg-green-600 transition shadow-md hover:shadow-lg"
+              id="icon-toggle-mic"
+              class="grid place-items-center bg-gray-700 p-3 h-10 w-10 rounded-full hover:bg-gray-600 text-white shadow-lg"
             >
-                Create Meeting
+              <i class="fas fa-microphone"></i>
             </button>
+          </div>
         </div>
+
+        <!-- Dropdowns for Camera and Microphone -->
+        <div class="w-full max-w-md mx-auto mt-1">
+          <div class="grid grid-cols-2 gap-2 items-center text-sm">
+            <!-- Camera Dropdown -->
+            <select
+              id="camera-dropdown"
+              class="p-2 border border-gray-800 bg-gray-900 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-300"
+            ></select>
+
+            <!-- Microphone Dropdown -->
+            <select
+              id="mic-dropdown"
+              class="p-2 border border-gray-800 bg-gray-900 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-300"
+            ></select>
+          </div>
+        </div>
+
+        <!-- Participant Name for Joining Screen -->
+      </div>
+    </div>
+
+    <!-- loader -->
+    <div id="loader" style="display: none">
+      <div class="flex flex-col items-center gap-4">
+        <h3>Getting things ready... 😊</h3>
+      </div>
     </div>
 
     <script src="../dist/bundle.js"></script>
-</body>
-
-<!-- <div class="bg-white shadow-lg rounded-lg p-8 max-w-md mx-auto mt-10">
-    <div class="mb-6">
-        <input type="text" placeholder="Enter your name..." class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-    </div>
-    <div>
-        <button class="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition">Join Meeting</button>
-    </div>
-</div> -->
+  </body>
 </html>
