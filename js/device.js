@@ -1,14 +1,20 @@
 import { VideoSDK } from "@videosdk.live/js-sdk";
+const videoPreview = document.getElementById("camera-preview");
+const webcamFallbackUI = document.getElementById("webcam-fallback-ui");
 
 class Device {
-  constructor(webcamDropdown, micDropdown, videoPreview, webcamFallbackUI) {
+  constructor(webcamDropdown, micDropdown) {
     this.cameras = VideoSDK.getCameras();
     this.microphones = VideoSDK.getMicrophones();
     this.webcamDropdown = webcamDropdown;
     this.micDropdown = micDropdown;
     this.checkAudioVideoPermission = null;
+    this.currentVideoTrack = null;
+    this.currentCameraId = null;
     this.videoPreview = videoPreview;
     this.webcamFallbackUI = webcamFallbackUI;
+    this.isWebcamEnabled = false;
+    this.isMicEnabled = false;
   }
   async loadAllDevices() {
     try {
@@ -43,7 +49,7 @@ class Device {
   }
 
   async checkPermission(permissionType) {
-    if (this.checkAudioVideoPermission === null) {
+    if (!this.checkAudioVideoPermission) {
       console.log("Permission status not initialized: check device.js file");
       return;
     }
@@ -82,32 +88,17 @@ class Device {
       await this.checkPermission(VideoSDK.Constants.permission.VIDEO);
     } catch (err) {
       console.log("(Error) during Audio/Video permission request:", err);
-    } finally {
-      try {
-        this.checkAudioVideoPermission = await VideoSDK.checkPermissions(
-          VideoSDK.Constants.permission.AUDIO_AND_VIDEO
-        );
-      } catch (finalErr) {
-        console.error("Error in final block:", finalErr);
-      }
     }
   }
 
   async setDefaultCamera() {
     if (this.cameras && this.cameras.length > 0) {
       const defaultCamera = this.cameras[0]; // Use the first camera as default
-      this.webcamDropdown.value = defaultCamera.deviceId;
+      const cameraId = (this.webcamDropdown.value = defaultCamera.deviceId);
 
       // Automatically enable the camera
       try {
-        const videoTrack = await VideoSDK.createCameraVideoTrack({
-          cameraId: defaultCamera.deviceId,
-          multiStream: false,
-        });
-
-        this.videoPreview.srcObject = videoTrack;
-        this.webcamFallbackUI.style.display = "none";
-        this.videoPreview.style.display = "block";
+        await this.toggleWebcam(cameraId);
       } catch (error) {
         console.error("Error accessing default video track:", error);
       }
@@ -116,7 +107,35 @@ class Device {
     }
   }
 
-  async toggleWebcam() {
+  async toggleWebcam(cameraId) {
+    try {
+      if (this.isWebcamEnabled) {
+        this.videoPreview.srcObject = null;
+        this.webcamFallbackUI.style.display = "flex";
+        this.videoPreview.style.display = "none";
+        // this.currentCameraId = null;
+        this.isWebcamEnabled = false;
+      } else {
+        const videoTrack = await VideoSDK.createCameraVideoTrack({
+          cameraId,
+          multiStream: false,
+        });
+
+        this.currentVideoTrack = videoTrack;
+        this.videoPreview.srcObject = videoTrack;
+        this.webcamFallbackUI.style.display = "none";
+        this.videoPreview.style.display = "flex";
+        this.currentCameraId = cameraId;
+        this.isWebcamEnabled = true;
+
+        console.log("Webcam enabled with camera:", cameraId);
+      }
+    } catch (error) {
+      console.error("Error toggling webcam:", error);
+    }
+  }
+
+  async changeWebcam() {
     const deviceID = this.webcamDropdown.value;
 
     if (!this.checkAudioVideoPermission.get("video")) {
@@ -130,7 +149,8 @@ class Device {
 
         this.videoPreview.srcObject = videoTrack;
         this.webcamFallbackUI.style.display = "none";
-        this.videoPreview.style.display = "block";
+        this.videoPreview.style.display = "flex";
+        this.currentCameraId = deviceID;
       } catch (error) {
         console.error("Error accessing video track:", error);
       }
